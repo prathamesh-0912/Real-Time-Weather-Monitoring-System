@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real Time Weather Monitoring System</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
+    <link rel="stylesheet" href="../static/css/style.css"> 
+</head>
+<body>
+    <div id="container" class='container'>
+        <h1>Real Time Weather Monitoring System</h1>
+        <div class="login">
+            <form id="weatherForm" method="POST">
+                <div class="form-group">
+                    <label for="variable">Select Variable:</label>
+                    <div class="select-container">
+                        <select name="variable" id="variable" class="variable-select" onchange="toggleLevelFields(), toggleLeveltypeFields()" >
+                            <option value="" selected disabled>Select a Variable</option>
+                            {% for variable in variables %}
+                                <option value="{{ variable }}">{{ variable }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <label for="interval">Select Interval:</label>
+                    <div class="select-container">
+                        <select name="interval" id="interval" class="variable-select">
+                            <option value="" selected disabled>Select a Interval</option>
+                            {% for interval in intervals %}
+                                <option value="{{ interval }}">{{ interval }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <label>Select Location Type:</label>
+                    <div class="select-container">
+                        <select name="location" id="location" onchange="toggleLocationFields()" class="variable-select">
+                            <option value="" selected disabled>Select a Location Type</option>
+                            {% for location in locations %}
+                                <option value="{{ location }}" class="variable-select">{{ location }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+                
+                <div>
+                <div class="form-group" style="display:none;"id="level_type_field">
+                    <label>Select Level Type:</label>
+                    <div class="select-container">
+                        <select name="level_type" id="level_type" onchange="toggleLeveltypeFields()" class="variable-select">
+                            <option value="" selected disabled>Select a Level Type</option>
+                            <option value="single">Single Level</option>
+                            <option value="multiple">Multiple Levels</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="custom_area_fields" style="display:none;">
+                    <div class="form-group">
+                        <label for="custom_area">Select Customized Area:</label>
+                        <div class="select-container">
+                            <select name="custom_area" id="custom_area" class="variable-select">
+                                {% for area_name in customized_areas %}
+                                    <option value="{{ area_name }}">{{ area_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>                
+                
+            </div>                
+
+                <div id="single_level_fields" style="display:none;">
+                    <div class="form-group">
+                        <label for="level">Select Level (hPa):</label>
+                        <div class="select-container">
+                            <select name="level" id="level" class="variable-select">
+                                <option value="" selected disabled>Select a Level</option>
+                                {% for level in levels %}
+                                    <option value="{{ level }}" class="variable-select">{{ level }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="multiple_levels_fields" style="display:none;">
+                    <div class="form-group">
+                        <label for="start_level">Start Level:</label>
+                        <input type="text" name="start_level" id="start_level" class="variable-select">
+                        
+                        <label for="end_level">End Level:</label>
+                        <input type="text" name="end_level" id="end_level" class="variable-select">
+                    </div>
+                </div>
+
+                <div id="two_level_fields" style="display:none;">
+                    <div class="form-group">
+                        <label for="upper_level">Upper Level:</label>
+                        <input type="text" name="upper_level" id="upper_level" class="variable-select">
+                        
+                        <label for="lower_level">Lower Level:</label>
+                        <input type="text" name="lower_level" id="lower_level" class="variable-select">
+                    </div>
+                </div>
+
+                
+                <div id="specific_location_fields" style="display:none;">
+                    <div class="form-group">
+                        <label for="latitude" >Latitude:</label>
+                        <input type="text" name="latitude" id="latitude" class="variable-select" placeholder="DD-Direction">
+                        
+                        <label for="longitude">Longitude:</label>
+                        <input type="text" name="longitude" id="longitude" class="variable-select" placeholder="DD-Direction">
+                    </div>
+                </div>
+                
+                <div id="area_fields" style="display:none;">
+                    <div class="form-group">
+                        <label for="start_latitude">Start Latitude:</label>
+                        <input type="text" name="start_latitude" id="start_latitude" class="variable-select"  placeholder="DD-Direction(90 to -90)">
+                    
+                        <label for="start_longitude">Start Longitude:</label>
+                        <input type="text" name="start_longitude" id="start_longitude" class="variable-select"  placeholder="DD-Direction(0 to 360)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="end_latitude">End Latitude:</label>
+                        <input type="text" id="end_latitude" name="end_latitude" class="variable-select"  placeholder="DD-Direction(90 to -90)">
+                
+                        <label for="end_longitude">End Longitude:</label>
+                        <input type="text" id="end_longitude" name="end_longitude" class="variable-select"  placeholder="DD-Direction(0 to 360)">
+                    </div>
+                </div>               
+                
+                <div class="form-group">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" name="start_date" id="start_date" class="time-interval-select">
+
+                    <label for="end_date">End Date:</label>
+                    <input type="date" name="end_date" id="end_date" class="time-interval-select">
+                </div>            
+
+                <div class="form-group submit-button">
+                    <input type="submit" value="Generate Plot" class="btn btn-primary btn-large btn-block">
+                </div>
+
+            </form>
+
+            <div id="plotContainer">
+                {% if plot_image %}
+                    <h2>Generated Plot:</h2>
+                    <img src="data:image/png;base64,{{ plot_image }}" alt="Generated Plot" onload="updateContainerSize()">
+                {% endif %}
+            </div>
+
+            {% if error_message %}
+                <p class="error-message">{{ error_message }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+            function toggleLocationFields() {
+                var locationType = document.getElementById("location").value;
+                if (locationType === "Specific Location") {
+                    document.getElementById("specific_location_fields").style.display = "block";
+                    document.getElementById("area_fields").style.display = "none";
+                } else if (locationType === "Customized Areas") {
+                    document.getElementById("specific_location_fields").style.display = "none";
+                    document.getElementById("area_fields").style.display = "none";
+                    document.getElementById("custom_area_fields").style.display = "block";
+            
+                } else {
+                    document.getElementById("specific_location_fields").style.display = "none";
+                    document.getElementById("area_fields").style.display = "block";
+                    document.getElementById("custom_area_fields").style.display = "none";
+                }
+            }
+            
+            function toggleLevelFields() {
+                var variable = document.getElementById("variable").value;
+            
+                if (variable === "Tropospheric Temperature" || variable === "Tropospheric Thickness") {
+                    document.getElementById("level_type_field").style.display = "none";
+                    document.getElementById("single_level_fields").style.display = "none";
+                    document.getElementById("multiple_levels_fields").style.display = "none";
+                } else {
+                    document.getElementById("level_type_field").style.display = "block";
+                }
+            }
+
+            function toggleLeveltypeFields() {
+                var leveltype = document.getElementById("level_type").value;
+                var variable = document.getElementById("variable").value;
+
+                if (variable === "Tropospheric Temperature" || variable === "Tropospheric Thickness") {
+                    document.getElementById("level_type_field").style.display = "none";
+                    document.getElementById("single_level_fields").style.display = "none";
+                    document.getElementById("multiple_levels_fields").style.display = "none";
+                    document.getElementById("two_level_fields").style.display = "none";
+                } else if (variable === "Geopotential Height") {
+                    if (leveltype === "single") {
+                    document.getElementById("single_level_fields").style.display = "block";
+                    document.getElementById("multiple_levels_fields").style.display = "none";
+                    document.getElementById("two_level_fields").style.display = "none";
+                    } else {
+                    document.getElementById("single_level_fields").style.display = "none";
+                    document.getElementById("multiple_levels_fields").style.display = "none";
+                    document.getElementById("two_level_fields").style.display = "block";
+                    }
+                } else {
+                    if (leveltype === "single") {
+                        document.getElementById("single_level_fields").style.display = "block";
+                        document.getElementById("multiple_levels_fields").style.display = "none";
+                        document.getElementById("two_level_fields").style.display = "none";
+                    } else{
+                        document.getElementById("single_level_fields").style.display = "none";
+                        document.getElementById("multiple_levels_fields").style.display = "block";
+                        document.getElementById("two_level_fields").style.display = "none";
+                    }
+                }
+            }
+
+            
+    </script> 
+    
+</body>
+</html>
